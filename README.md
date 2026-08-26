@@ -153,6 +153,20 @@ systemctl --user stop tablet-screen
 do nothing. Use your PC's mouse and keyboard. (Injecting input is possible via
 `org.gnome.Mutter.RemoteDesktop`, but is not implemented here.)
 
+**Staying awake and bright.** Two separate mechanisms, because Android has two
+separate behaviours. `KEEP_AWAKE=1` stops the screen switching *off*
+(`svc power stayon true`), but Android also dims the panel to roughly 30%
+brightness shortly before its screen-off timeout, and stay-awake does not
+prevent that. So the page also holds a [Screen Wake
+Lock](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API),
+which stops both. It needs a secure context, which `http://127.0.0.1` counts as.
+If your browser refuses the lock and the screen still dims, raise the tablet's
+own timeout instead:
+
+```bash
+adb shell settings put system screen_off_timeout 1800000   # 30 minutes
+```
+
 **Why not RDP?** GNOME Remote Desktop can extend the desktop and *does* carry
 touch input, so it looks like the obvious answer. On hardware without NVENC it
 is not: GNOME Remote Desktop only implements hardware H.264 via NVIDIA's NVENC,

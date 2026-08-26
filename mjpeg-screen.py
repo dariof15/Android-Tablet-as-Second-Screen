@@ -91,9 +91,29 @@ PAGE = """<!doctype html>
   img.onload = () => hint.remove();
   // Cache-bust so a reconnect doesn't latch onto the previous dead stream.
   img.src = '/stream?t=' + Date.now();
+
+  // Hold a screen wake lock. Android dims the panel to ~30% brightness shortly
+  // before its screen-off timeout; "stay awake while charging" stops the screen
+  // switching off but does NOT stop that dim step. A screen wake lock stops
+  // both. This needs a secure context, which http://127.0.0.1 satisfies.
+  let lock = null;
+  async function hold() {
+    if (!('wakeLock' in navigator) || lock) return;
+    try {
+      lock = await navigator.wakeLock.request('screen');
+      lock.addEventListener('release', () => { lock = null; });
+    } catch (e) { /* denied or unsupported: harmless, screen just dims */ }
+  }
+  hold();
+  // The lock is dropped whenever the page is hidden, so retake it on return.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') hold();
+  });
+
   // Tapping goes fullscreen; browser chrome otherwise eats screen area.
   document.body.addEventListener('click', () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    hold();  // also a good moment to retry if the initial request was refused
   });
 </script>
 """
