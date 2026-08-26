@@ -1,0 +1,14 @@
+# Local configuration - copy .env.example instead.
+.env
+
+# Generated systemd units live in ~/.config/systemd/user, not here.
+
+__pycache__/
+*.pyc
+
+# Screenshots pulled off the tablet contain your desktop.
+*.png
+*.jpg
+
+# Claude Code per-machine settings
+.claude/settings.local.json
