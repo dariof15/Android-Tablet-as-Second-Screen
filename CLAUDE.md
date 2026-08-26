@@ -139,6 +139,14 @@ attractive. It was built, measured, and deleted:
   when done, and note `*.png`/`*.jpg` are gitignored for that reason.
 - This is destined for a public repo: keep machine-specific paths, serials, and hostnames
   out of committed files.
+- **Cold boot is unverified.** The services have only ever been observed starting into an
+  already-running session. `mjpeg-screen.py` and `auto-layout.py` need Mutter to own its
+  D-Bus names, and `After=graphical-session.target` does not guarantee that; `RestartSec=5`
+  covers the race by reasoning, not measurement. If autostart misbehaves after a reboot,
+  check `journalctl --user -u tablet-screen -b` for a restart loop before looking anywhere
+  else. Persistent failure needs a real readiness gate on the Mutter bus name, not a longer
+  `RestartSec`. `usb-tunnel.sh` needs no Mutter and should be immune — if it fails too, the
+  problem is adb.
 
 ## Threading model in `mjpeg-screen.py`
 

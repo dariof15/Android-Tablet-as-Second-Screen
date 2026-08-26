@@ -177,6 +177,17 @@ MB/s and only changed frames are sent at all.
 publishes your screen unencrypted and unauthenticated to anyone who can reach
 that address.
 
+**Autostart at boot is not well tested.** The services are ordered
+`After=graphical-session.target`, but they need Mutter to already own its D-Bus
+names, and systemd may start them first. `Restart=always` with `RestartSec=5`
+is what covers that race. A handful of restarts early in the boot that then
+settle is expected; if it never settles, check:
+
+```bash
+systemctl --user status tablet-screen
+journalctl --user -u tablet-screen -b     # look for a restart loop
+```
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
