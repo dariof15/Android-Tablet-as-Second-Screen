@@ -191,11 +191,13 @@ MB/s and only changed frames are sent at all.
 publishes your screen unencrypted and unauthenticated to anyone who can reach
 that address.
 
-**Autostart at boot is not well tested.** The services are ordered
-`After=graphical-session.target`, but they need Mutter to already own its D-Bus
-names, and systemd may start them first. `Restart=always` with `RestartSec=5`
-is what covers that race. A handful of restarts early in the boot that then
-settle is expected; if it never settles, check:
+**Autostart at boot works.** Verified on a cold boot: all three services were
+running half a minute after boot, and simply plugging the tablet in and opening
+the browser was enough — no restarts, no manual step. The services are ordered
+`After=graphical-session.target` but do not depend on Mutter being ready at that
+moment: the stream only talks to Mutter once the tablet asks for a frame, and
+the layout watcher retries. `Restart=always` is a backstop. If it ever does not
+come up, check:
 
 ```bash
 systemctl --user status tablet-screen
